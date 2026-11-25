@@ -34,3 +34,4 @@ ehthumbs.db
 # Large temporary data (keep small sample/processed files or track directory structure)
 data/raw/*.tmp
 *.log
+reports/page_previews/

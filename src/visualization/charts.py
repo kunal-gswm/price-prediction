@@ -26,6 +26,7 @@ logger = get_logger(__name__)
 # Configure academic visual style for Matplotlib/Seaborn
 sns.set_theme(style="whitegrid", palette="deep")
 plt.rcParams.update({
+    "font.family": ["Segoe UI", "Arial", "DejaVu Sans", "sans-serif"],
     "font.size": 10,
     "axes.labelsize": 11,
     "axes.titlesize": 12,
@@ -47,33 +48,53 @@ def plot_historical_price_matplotlib(
     ticker: str = "RELIANCE.NS",
     save_path: Optional[Path] = None,
 ) -> Path:
-    """Plots historical closing price line chart with volume subplot in INR."""
+    """Plots historical closing price line chart with high-contrast volume subplot in INR."""
     safe_t = ticker.replace(".", "_")
     if save_path is None:
         save_path = FIGURES_DIR / f"{safe_t}_price_history.png"
 
     fig, (ax1, ax2) = plt.subplots(
-        2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"height_ratios": [3, 1]}
+        2, 1, figsize=(10, 6), sharex=True, gridspec_kw={"height_ratios": [3, 1.2]}
     )
 
     # Price Line in INR
-    ax1.plot(df.index, df["Close"], label="Closing Price", color="#1f77b4", linewidth=1.5)
-    ax1.set_title(f"Historical Daily Closing Price - {ticker} (NSE/BSE)", fontweight="bold")
+    ax1.plot(df.index, df["Close"], label="Closing Price (INR)", color="#1d4ed8", linewidth=1.6)
+    ax1.set_title(f"Historical Daily Closing Price & Trading Volume - {ticker} (NSE)", fontweight="bold", fontsize=12)
     ax1.set_ylabel(f"Price ({CURRENCY_SYMBOL} INR)")
-    ax1.legend(loc="upper left")
+    ax1.legend(loc="upper left", frameon=True)
     ax1.grid(True, linestyle="--", alpha=0.5)
 
-    # Volume Bars (in Lakhs / Crores proxy: Millions)
-    ax2.bar(df.index, df["Volume"] / 1e5, color="#aec7e8", width=1.0, label="Volume (Lakh shares)")
-    ax2.set_ylabel("Vol (Lakhs)")
+    # Volume Bars (in Lakhs shares) with high contrast and session direction coloring
+    vol_lakhs = df["Volume"] / 1e5
+    if "Open" in df.columns:
+        vol_colors = np.where(df["Close"] >= df["Open"], "#16a34a", "#dc2626")
+    else:
+        vol_colors = "#2563eb"
+
+    ax2.bar(
+        df.index,
+        vol_lakhs,
+        color=vol_colors,
+        width=0.85,
+        alpha=0.8,
+        label="Daily Volume (Green: Up, Red: Down)",
+        edgecolor="none",
+    )
+
+    # 20-Day Volume Moving Average Line for institutional liquidity trend
+    vol_ma20 = vol_lakhs.rolling(20).mean()
+    ax2.plot(df.index, vol_ma20, color="#0f172a", linewidth=1.4, label="20-Day Vol MA (Lakh shares)")
+
+    ax2.set_ylabel("Vol (Lakh shares)")
     ax2.set_xlabel("Trading Date")
-    ax2.legend(loc="upper left")
+    ax2.set_ylim(0, max(1.0, float(vol_lakhs.max()) * 1.15))
+    ax2.legend(loc="upper left", frameon=True, fontsize=8)
     ax2.grid(True, linestyle="--", alpha=0.5)
 
     plt.tight_layout()
     fig.savefig(save_path)
     plt.close(fig)
-    logger.info(f"Saved historical price plot to {save_path}")
+    logger.info(f"Saved historical price plot with high-contrast volume bars to {save_path}")
     return save_path
 
 
