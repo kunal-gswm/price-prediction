@@ -45,8 +45,27 @@ from src.utils.logger import get_logger
 logger = get_logger("source_code_pdf")
 
 
-def setup_reportlab_fonts() -> str:
+def setup_reportlab_fonts() -> tuple[str, str]:
     """Registers TrueType fonts that natively support the Indian Rupee symbol (₹, U+20B9)."""
+    # 1. Register Monospace font for code first (Consolas has native Rupee support)
+    code_font_name = "Courier"
+    consolas_path = "C:/Windows/Fonts/consola.ttf"
+    if os.path.exists(consolas_path):
+        try:
+            pdfmetrics.registerFont(TTFont("Consolas", consolas_path))
+            pdfmetrics.registerFontFamily(
+                "Consolas",
+                normal="Consolas",
+                bold="Consolas",
+                italic="Consolas",
+                boldItalic="Consolas",
+            )
+            code_font_name = "Consolas"
+            logger.info("Registered TrueType font 'Consolas' for code listings with Rupee support.")
+        except Exception as e:
+            logger.warning(f"Failed to register Consolas: {e}")
+
+    # 2. Register Proportional font family for text
     candidates = [
         (
             "SegoeUI",
@@ -70,6 +89,7 @@ def setup_reportlab_fonts() -> str:
             "C:/Windows/Fonts/calibriz.ttf",
         ),
     ]
+    font_fam = "Helvetica"
     for fam_name, reg, bld, it, bit in candidates:
         if os.path.exists(reg) and os.path.exists(bld) and os.path.exists(it) and os.path.exists(bit):
             try:
@@ -85,19 +105,12 @@ def setup_reportlab_fonts() -> str:
                     boldItalic=f"{fam_name}-BoldItalic",
                 )
                 logger.info(f"Registered TTFont family '{fam_name}' for full Indian Rupee (₹) glyph support.")
-                return fam_name
+                font_fam = fam_name
+                break
             except Exception as e:
                 logger.warning(f"Failed to register font {fam_name}: {e}")
 
-    # Register Consolas for code if available
-    consolas_path = "C:/Windows/Fonts/consola.ttf"
-    if os.path.exists(consolas_path):
-        try:
-            pdfmetrics.registerFont(TTFont("Consolas", consolas_path))
-        except Exception:
-            pass
-
-    return "Helvetica"
+    return font_fam, code_font_name
 
 
 class SourceCodeCanvas(canvas.Canvas):
@@ -143,9 +156,9 @@ class SourceCodeCanvas(canvas.Canvas):
         self.restoreState()
 
 
-def build_source_code_pdf():
+def build_source_code_pdf(code_fontSize: float = 6.5, code_leading: float = 8.2):
     """Generates the supplementary complete source code PDF document."""
-    font_fam = setup_reportlab_fonts()
+    font_fam, code_font = setup_reportlab_fonts()
     font_bold = f"{font_fam}-Bold" if font_fam != "Helvetica" else "Helvetica-Bold"
     font_italic = f"{font_fam}-Italic" if font_fam != "Helvetica" else "Helvetica-Oblique"
 
@@ -208,13 +221,12 @@ def build_source_code_pdf():
         spaceAfter=6,
         keepWithNext=True,
     )
-    code_font = "Consolas" if "Consolas" in pdfmetrics.getRegisteredFontNames() else "Courier"
     code_style = ParagraphStyle(
         "CodeBody",
         parent=styles["Normal"],
         fontName=code_font,
-        fontSize=6.5,
-        leading=8.5,
+        fontSize=code_fontSize,
+        leading=code_leading,
         textColor=colors.HexColor("#0f172a"),
     )
 
@@ -235,8 +247,9 @@ def build_source_code_pdf():
         f"<b>Target Asset:</b> Reliance Industries Limited (RELIANCE.NS) on the National Stock Exchange of India (NSE)<br/>"
         f"<b>Primary Currency:</b> Indian Rupee (INR, {CURRENCY_SYMBOL}) | Timezone: Asia/Kolkata (IST)<br/>"
         f"<b>Repository:</b> https://github.com/kunal-gswm/price-prediction<br/>"
+        f"<b>Companion Document:</b> Academic Technical Report (<code>Stock_Price_Prediction_Report.pdf</code>, 11 pages)<br/>"
         f"<b>Compiled:</b> {datetime.now().strftime('%B %d, %Y')}<br/>"
-        f"<b>Scope:</b> Complete, verifiable Python implementation across 13 core modules."
+        f"<b>Scope:</b> Complete, verifiable Python implementation across 14 core modules."
     )
     story.append(Paragraph(cover_meta_text, meta_style))
     story.append(Spacer(1, 15))

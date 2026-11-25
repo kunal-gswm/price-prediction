@@ -422,26 +422,81 @@ def build_academic_pdf():
         )
     )
 
+    ingest_hdr_style = ParagraphStyle(
+        "IngestHdr",
+        parent=styles["Normal"],
+        fontName=FONT_BOLD,
+        fontSize=6.8,
+        leading=8.2,
+        textColor=colors.white,
+    )
+    ingest_bold_style = ParagraphStyle(
+        "IngestBold",
+        parent=styles["Normal"],
+        fontName=FONT_BOLD,
+        fontSize=6.5,
+        leading=8.0,
+        textColor=colors.HexColor("#1e293b"),
+    )
+    ingest_val_style = ParagraphStyle(
+        "IngestVal",
+        parent=styles["Normal"],
+        fontName=FONT_FAMILY,
+        fontSize=6.5,
+        leading=8.0,
+        textColor=colors.HexColor("#0f172a"),
+    )
+
     ingest_table_data = [
-        ["Ingestion Attribute", "Specification / Empirical Value", "Ingestion Attribute", "Specification / Empirical Value"],
-        ["Target Instrument", f"{results['company_name']} ({results['ticker']})", "Primary Exchange", "National Stock Exchange of India (NSE)"],
-        ["Data Source", "Yahoo Finance via yfinance (Daily OHLCV)", "Currency & Denomination", f"Indian Rupee (INR, {CURRENCY_SYMBOL})"],
-        ["Raw Ingested Sessions", f"{results['data_metadata']['row_count']} trading days", "Clean Modeling Pairs", f"{results['feature_audit']['clean_rows']} sessions"],
-        ["Warmup Truncation", f"{results['feature_audit']['warmup_rows_dropped']} sessions (SMA 50 initialization)", "Unobserved Target Drop", "1 session (final observation t)"],
-        ["Chronological Splits", "Train: 70% (828) | Val: 15% (177) | Test: 15% (179)", "Exchange Timezone", "Asia/Kolkata (IST, UTC+05:30)"],
+        [
+            Paragraph("Ingestion Attribute", ingest_hdr_style),
+            Paragraph("Specification / Empirical Value", ingest_hdr_style),
+            Paragraph("Ingestion Attribute", ingest_hdr_style),
+            Paragraph("Specification / Empirical Value", ingest_hdr_style),
+        ],
+        [
+            Paragraph("Target Instrument", ingest_bold_style),
+            Paragraph(f"<b>{results['company_name']}</b><br/><code>{results['ticker']}</code>", ingest_val_style),
+            Paragraph("Primary Exchange", ingest_bold_style),
+            Paragraph("National Stock Exchange of India (NSE)", ingest_val_style),
+        ],
+        [
+            Paragraph("Data Source", ingest_bold_style),
+            Paragraph("Yahoo Finance via <code>yfinance</code><br/>(Daily OHLCV History)", ingest_val_style),
+            Paragraph("Currency & Denomination", ingest_bold_style),
+            Paragraph(f"Indian Rupee (INR, {CURRENCY_SYMBOL})", ingest_val_style),
+        ],
+        [
+            Paragraph("Raw Ingested Data", ingest_bold_style),
+            Paragraph(f"{results['data_metadata']['row_count']} daily sessions", ingest_val_style),
+            Paragraph("Clean Modeling Pairs", ingest_bold_style),
+            Paragraph(f"{results['feature_audit']['clean_rows']} sessions (X<sub>t</sub>, y<sub>t+1</sub>)", ingest_val_style),
+        ],
+        [
+            Paragraph("Warmup Truncation", ingest_bold_style),
+            Paragraph(f"{results['feature_audit']['warmup_rows_dropped']} sessions (SMA 50 init)", ingest_val_style),
+            Paragraph("Unobserved Target Drop", ingest_bold_style),
+            Paragraph("1 session (final observation t)", ingest_val_style),
+        ],
+        [
+            Paragraph("Chronological Splits", ingest_bold_style),
+            Paragraph("Train: 70% (828) | Val: 15% (177)<br/>Test: 15% (179 sessions)", ingest_val_style),
+            Paragraph("Exchange Timezone", ingest_bold_style),
+            Paragraph("Asia/Kolkata (IST, UTC+05:30)", ingest_val_style),
+        ],
     ]
-    ingest_table = Table(ingest_table_data, colWidths=[120, 132, 120, 132])
+    ingest_table = Table(ingest_table_data, colWidths=[105, 147, 105, 147])
     ingest_table.setStyle(
         TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), FONT_BOLD),
-            ("FONTNAME", (0, 1), (-1, -1), FONT_FAMILY),
-            ("FONTSIZE", (0, 0), (-1, -1), 7.5),
             ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
-            ("TOPPADDING", (0, 0), (-1, -1), 3.5),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
+            ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+            ("LEFTPADDING", (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ])
     )
     story.append(Spacer(1, 4))
@@ -1022,30 +1077,95 @@ def build_academic_pdf():
     story.append(Spacer(1, 10))
 
     # Final Verification & Compliance Summary Table on Page 11
+    comp_hdr_style = ParagraphStyle(
+        "CompHdr",
+        parent=styles["Normal"],
+        fontName=FONT_BOLD,
+        fontSize=6.8,
+        leading=8.2,
+        textColor=colors.white,
+    )
+    comp_bold_style = ParagraphStyle(
+        "CompBold",
+        parent=styles["Normal"],
+        fontName=FONT_BOLD,
+        fontSize=6.5,
+        leading=8.0,
+        textColor=colors.HexColor("#1e293b"),
+    )
+    comp_body_style = ParagraphStyle(
+        "CompBody",
+        parent=styles["Normal"],
+        fontName=FONT_FAMILY,
+        fontSize=6.5,
+        leading=8.0,
+        textColor=colors.HexColor("#334155"),
+    )
+
     compliance_table_data = [
-        ["Audit & Submission Criterion", "Verified Implementation Status", "Reference / Metric"],
-        ["Target Instrument & Market", "Reliance Industries Limited (RELIANCE.NS) on NSE India", "Denominated in Indian Rupees (INR, ₹)"],
-        ["Data Provenance & Cleaning", "Yahoo Finance via yfinance, strict IST timestamps", "1,236 raw sessions -> 1,184 clean feature pairs"],
-        ["Prediction Interval Leakage", "Resolved via Split Conformal Prediction on validation set", "Nominal: 95.00% | Actual Test: 92.74% (Margin: ±₹34.70)"],
-        ["Equal Predictive Accuracy Test", "Diebold-Mariano test (HLN corrected) vs Naive Baseline", f"DM = {dm_info.get('dm_statistic', -1.0183):.4f}, p = {dm_info.get('p_value', 0.3099):.4f} (Not Statistically Significant)"],
-        ["Directional Parity Across Models", "Evaluated on identical non-zero move sessions (178 days)", f"Model: {comp['directional_accuracy_pct']:.2f}% | Naive Momentum: {naive_dir:.2f}% | No-Change: 0.00%"],
-        ["Trading Frictions Disclosure", "Brokerage, STT (0.10%), exchange fees, SEBI, GST, slippage", "Total round-trip hurdle (0.15%-0.25%) exceeds statistical edge"],
-        ["Exchange Calendar Distinction", "Official NSE Circular Registry (Primary) + XBOM Proxy (BSE)", "Conservative rollover beyond verified circular years (>2026)"],
-        ["Complete Source Code Appendix", "Full verbatim implementation in supplementary document", "Stock_Price_Prediction_Source_Code.pdf (66 pages)"],
-        ["GitHub Version Control", "Public Git repository with complete tests and artifacts", "https://github.com/kunal-gswm/price-prediction"],
+        [
+            Paragraph("Audit & Submission Criterion", comp_hdr_style),
+            Paragraph("Verified Implementation Status", comp_hdr_style),
+            Paragraph("Reference / Empirical Metric", comp_hdr_style),
+        ],
+        [
+            Paragraph("Target Instrument & Market", comp_bold_style),
+            Paragraph("Reliance Industries Limited (RELIANCE.NS) on NSE India", comp_body_style),
+            Paragraph("Denominated in Indian Rupees (INR, ₹)", comp_body_style),
+        ],
+        [
+            Paragraph("Data Provenance & Cleaning", comp_bold_style),
+            Paragraph("Yahoo Finance via yfinance, strict IST timestamps", comp_body_style),
+            Paragraph("1,236 raw sessions &rarr; 1,184 clean feature pairs", comp_body_style),
+        ],
+        [
+            Paragraph("Prediction Interval Leakage", comp_bold_style),
+            Paragraph("Resolved via Split Conformal Prediction on validation set", comp_body_style),
+            Paragraph("Nominal: 95.00% | Actual Test: 92.74% (Margin: &plusmn;₹34.70)", comp_body_style),
+        ],
+        [
+            Paragraph("Equal Predictive Accuracy Test", comp_bold_style),
+            Paragraph("Diebold-Mariano test (HLN corrected) vs Naive Baseline", comp_body_style),
+            Paragraph(f"DM = {dm_info.get('dm_statistic', -1.0183):.4f}, p = {dm_info.get('p_value', 0.3099):.4f} (Not Statistically Significant)", comp_body_style),
+        ],
+        [
+            Paragraph("Directional Parity Across Models", comp_bold_style),
+            Paragraph("Evaluated on identical non-zero move sessions (178 days)", comp_body_style),
+            Paragraph(f"Model: {comp['directional_accuracy_pct']:.2f}% | Naive Momentum: {naive_dir:.2f}% | No-Change: 0.00%", comp_body_style),
+        ],
+        [
+            Paragraph("Trading Frictions Disclosure", comp_bold_style),
+            Paragraph("Brokerage, STT (0.10%), exchange fees, SEBI, GST, slippage", comp_body_style),
+            Paragraph("Total round-trip hurdle (0.15%-0.25%) exceeds statistical edge", comp_body_style),
+        ],
+        [
+            Paragraph("Exchange Calendar Distinction", comp_bold_style),
+            Paragraph("Official NSE Circular Registry (Primary) + XBOM Proxy (BSE)", comp_body_style),
+            Paragraph("Conservative rollover beyond verified circular years (&gt;2026)", comp_body_style),
+        ],
+        [
+            Paragraph("Complete Source Code Appendix", comp_bold_style),
+            Paragraph("Full verbatim implementation in supplementary document", comp_body_style),
+            Paragraph("Stock_Price_Prediction_Source_Code.pdf (66 pages)", comp_body_style),
+        ],
+        [
+            Paragraph("GitHub Version Control", comp_bold_style),
+            Paragraph("Public Git repository with complete tests and artifacts", comp_body_style),
+            Paragraph("https://github.com/kunal-gswm/price-prediction", comp_body_style),
+        ],
     ]
-    comp_table = Table(compliance_table_data, colWidths=[150, 204, 150])
+    comp_table = Table(compliance_table_data, colWidths=[140, 194, 170])
     comp_table.setStyle(
         TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e293b")),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), FONT_BOLD),
-            ("FONTNAME", (0, 1), (-1, -1), FONT_FAMILY),
-            ("FONTSIZE", (0, 0), (-1, -1), 7.2),
             ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
-            ("TOPPADDING", (0, 0), (-1, -1), 3),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+            ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+            ("LEFTPADDING", (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ])
     )
     story.append(Paragraph("Submission Compliance & Verification Summary", h2_style))
