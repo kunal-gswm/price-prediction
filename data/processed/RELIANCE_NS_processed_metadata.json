@@ -1,0 +1,48 @@
+{
+  "clean_summary": {
+    "initial_rows": 1236,
+    "final_rows": 1236,
+    "rows_removed": 0,
+    "duplicates_removed": 0,
+    "missing_values_imputed": {
+      "Open": 0,
+      "High": 0,
+      "Low": 0,
+      "Close": 0,
+      "Volume": 0
+    },
+    "invalid_price_rows_removed": 0,
+    "date_range_start": "2021-11-25",
+    "date_range_end": "2026-11-25"
+  },
+  "feat_audit": {
+    "initial_rows": 1236,
+    "clean_rows": 1184,
+    "dropped_rows": 52,
+    "warmup_rows_dropped": 51,
+    "last_target_row_dropped": 1,
+    "start_date": "2022-02-03",
+    "end_date": "2026-11-23",
+    "features": [
+      "Close",
+      "Open",
+      "High",
+      "Low",
+      "Volume",
+      "SMA_5",
+      "SMA_10",
+      "SMA_20",
+      "SMA_50",
+      "EMA_10",
+      "Daily_Return",
+      "Prev_Close",
+      "Prev_Open",
+      "Prev_High",
+      "Prev_Low",
+      "Prev_Volume",
+      "Rolling_Volatility_10",
+      "Volume_Change"
+    ],
+    "target": "Target_Next_Close"
+  }
+}

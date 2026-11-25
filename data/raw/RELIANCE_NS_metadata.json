@@ -1,0 +1,25 @@
+{
+  "ticker": "RELIANCE.NS",
+  "company_name": "Reliance Industries Limited",
+  "exchange": "NSE",
+  "sector": "Energy & Retail",
+  "currency": "INR",
+  "currency_symbol": "\u20b9",
+  "timezone": "Asia/Kolkata",
+  "retrieval_timestamp": "2026-11-25T15:35:43.474269+00:00",
+  "period": "5y",
+  "start_date": "2021-11-25",
+  "end_date": "2026-11-25",
+  "interval": "1d",
+  "source": "Yahoo Finance (yfinance)",
+  "row_count": 1236,
+  "columns": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Adj Close",
+    "Volume"
+  ],
+  "notes": "Historical daily OHLCV data from Indian equity exchanges (NSE/BSE). All prices are quoted in Indian Rupees (INR, \u20b9)."
+}
